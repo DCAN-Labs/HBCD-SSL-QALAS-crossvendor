@@ -17,6 +17,7 @@ You do not need to know Python to use it: you edit a few paths in two scripts, m
 - [Quick start](#quick-start)
 - [Requirements](#requirements)
 - [Installation](#installation)
+- [Docker container](#docker-container)
 - [One-time setup](#one-time-setup)
 - [Input data (BIDS naming)](#input-data-bids-naming)
 - [Step 1: process one participant from each scanner first](#step-1-process-one-participant-from-each-scanner-first)
@@ -112,6 +113,33 @@ pip install -e .
 ```
 
 Note: this environment is different from the one in the original SSL-QALAS repository. If your cluster has no internet access, see [Troubleshooting](#troubleshooting).
+
+---
+
+## Docker container
+
+A Docker image is available on [Docker Hub](https://hub.docker.com/repository/docker/dcanumn/hbcd-ssl-qalas-crossvendor/tags). The currently listed tag is `1.0.0-test`. The container includes the processing environment and a lightweight SynthStrip setup, and runs the pipeline directly without Slurm.
+
+The image is built for `linux/amd64`. Docker must be installed on the machine where you run it. Mount your BIDS dataset read-only and mount a writable output directory. Replace the example paths and participant label with your own:
+
+```bash
+docker pull dcanumn/hbcd-ssl-qalas-crossvendor:1.0.0-test
+
+mkdir -p /path/to/qalas-output /path/to/qalas-work
+docker run --rm \
+  -v /path/to/bids:/data:ro \
+  -v /path/to/qalas-output:/out \
+  -v /path/to/qalas-work:/work \
+  dcanumn/hbcd-ssl-qalas-crossvendor:1.0.0-test \
+  /data /out participant \
+  --participant_label 001 \
+  -w /work \
+  --n_cpus 4
+```
+
+Participant and session labels are given without the `sub-` and `ses-` prefixes. To select a session too, add `--session_label 01`. For example, use `--no_b1_map` only if no B1 maps were acquired. Omit `--participant_label` to process all participants.
+
+Maps, logs, and scanner baseline checkpoints are written under `/path/to/qalas-output`. Keep that output directory between runs so the checkpoints remain available. The work directory is temporary processing space and should also be writable. The container processes on CPU; the GPU instructions below apply to the cluster/Conda workflow.
 
 ---
 
