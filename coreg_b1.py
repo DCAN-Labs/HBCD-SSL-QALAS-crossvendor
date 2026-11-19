@@ -6,6 +6,7 @@ contrast_path = sys.argv[1]
 qalas_path = sys.argv[2]
 b1_path = sys.argv[3]
 output_b1_path = sys.argv[4]
+sitk.ProcessObject.SetGlobalDefaultNumberOfThreads(1)
 
 # === LOAD IMAGES ===
 contrast = sitk.ReadImage(contrast_path, sitk.sitkFloat32)
@@ -31,7 +32,7 @@ initial_transform = sitk.CenteredTransformInitializer(
 registration = sitk.ImageRegistrationMethod()
 registration.SetMetricAsMattesMutualInformation(numberOfHistogramBins=32)
 registration.SetMetricSamplingStrategy(registration.RANDOM)
-registration.SetMetricSamplingPercentage(0.2)
+registration.SetMetricSamplingPercentage(0.2, 17)
 registration.SetInterpolator(sitk.sitkLinear)
 
 registration.SetOptimizerAsRegularStepGradientDescent(
